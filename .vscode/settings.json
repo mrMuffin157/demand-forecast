@@ -1,0 +1,40 @@
+{
+  // Point VS Code at the uv-managed virtualenv. Everything (Run button, debugger,
+  // notebook kernels, linting) then uses the same interpreter as `uv run`.
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+
+  // Scripts live in examples/ but import `demandml` from src/ -- this makes the
+  // editor's import resolution and the debugger agree with the installed package.
+  "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+  "python.analysis.typeCheckingMode": "basic",
+
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+
+  // Notebooks: render the figures inline and keep outputs out of git diffs.
+  "jupyter.notebookFileRoot": "${workspaceFolder}",
+  "notebook.output.textLineLimit": 60,
+  "notebook.output.scrolling": true,
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true
+  },
+  // data/ can hold gigabytes of Parquet -- excluding it keeps search and file-watching fast.
+  "files.watcherExclude": {
+    "**/data/**": true,
+    "**/.venv/**": true
+  },
+  "search.exclude": {
+    "**/data/**": true,
+    "**/.venv/**": true,
+    "**/experiments/**": true
+  },
+  "[python]": {
+    "editor.rulers": [100],
+    "editor.formatOnSave": false
+  }
+}

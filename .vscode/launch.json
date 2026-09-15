@@ -1,0 +1,70 @@
+{
+  // Hit F5 and pick one of these. They all run inside the .venv, so no `uv run` needed.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "1. Walkthrough (CSV -> models -> graphs)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/walkthrough.py",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "2. Visual report (6 figures)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "demandml.cli",
+      "args": ["report"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "3. Visual report -- quick",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "demandml.cli",
+      "args": ["report", "--quick", "--sku-limit", "120"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "4. Train a leaderboard",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "demandml.cli",
+      "args": ["train", "--models", "ma7,ma28,croston,lgbm_tweedie,two_stage",
+               "--horizon", "7", "--folds", "3", "--sku-limit", "200"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "5. Data-quality profile",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "demandml.cli",
+      "args": ["profile"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "6. Rebuild the pipeline (ingest -> panel -> features)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "demandml.cli",
+      "args": ["pipeline"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
