@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{color-scheme:light dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0}
+body{font:14px/1.5 system-ui,-apple-system,sans-serif;background:#faf9f7}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>SKU Demand Pipeline Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#edf0f3;
+  --surface:#ffffff;
+  --surface-2:#f5f8fa;
+  --ink:#141920;
+  --muted:#5a6774;
+  --faint:#8794a1;
+  --rule:#d3dae1;
+  --rule-soft:#e5eaee;
+  --rule-strong:#93a2ae;
+  --data:#1d6484;
+  --data-fill:#e0edf3;
+  --money:#a4382e;
+  --money-fill:#f8e6e2;
+  --study:#7a611b;
+  --study-fill:#f6eed9;
+  --shadow:0 1px 2px rgba(20,25,32,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#111519;
+    --surface:#1a1f25;
+    --surface-2:#161b20;
+    --ink:#e2e7ec;
+    --muted:#98a4b0;
+    --faint:#6b7783;
+    --rule:#2b333b;
+    --rule-soft:#232a31;
+    --rule-strong:#54626d;
+    --data:#6fb6d4;
+    --data-fill:#14313d;
+    --money:#e6836e;
+    --money-fill:#37201b;
+    --study:#d3b061;
+    --study-fill:#2e2714;
+    --shadow:0 1px 2px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111519;
+  --surface:#1a1f25;
+  --surface-2:#161b20;
+  --ink:#e2e7ec;
+  --muted:#98a4b0;
+  --faint:#6b7783;
+  --rule:#2b333b;
+  --rule-soft:#232a31;
+  --rule-strong:#54626d;
+  --data:#6fb6d4;
+  --data-fill:#14313d;
+  --money:#e6836e;
+  --money-fill:#37201b;
+  --study:#d3b061;
+  --study-fill:#2e2714;
+  --shadow:0 1px 2px rgba(0,0,0,.35);
+}
+
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  margin:0;
+}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:44px 80px;}
+
+h1{font-size:clamp(28px,5vw,40px);line-height:1.1;font-weight:700;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance;}
+h2{font-size:clamp(19px,3vw,23px);font-weight:600;letter-spacing:-.012em;margin:0 0 6px;text-wrap:balance;}
+h3{font-size:15px;font-weight:600;margin:0 0 4px;}
+p{margin:0 0 14px;max-width:68ch;}
+a{color:var(--data);}
+code,.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:.88em;}
+code{background:var(--surface-2);border:1px solid var(--rule-soft);border-radius:3px;padding:.5px 4px;}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;}
+.lede{font-size:17px;color:var(--muted);max-width:62ch;}
+.lede strong{color:var(--ink);font-weight:600;}
+
+header.hd{border-bottom:1px solid var(--rule);padding-bottom:30px;margin-bottom:38px;}
+section{margin-bottom:46px;}
+.sechead{margin-bottom:18px;}
+
+/* ---- figures ---- */
+figure{margin:0 0 8px;}
+.figbox{background:var(--surface);border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);padding:18px 18px 14px;overflow-x:auto;}
+.dgm{display:block;width:100%;height:auto;color:var(--ink);}
+.dgm.wide{min-width:940px;}
+.dgm.mid{min-width:620px;}
+figcaption{font-size:13px;color:var(--muted);margin-top:10px;max-width:70ch;}
+figcaption b{color:var(--ink);font-weight:600;}
+
+.dgm .bx{fill:var(--surface);stroke:var(--rule-strong);stroke-width:1;}
+.dgm .bx-d{fill:var(--data-fill);stroke:var(--data);stroke-width:1;}
+.dgm .bx-m{fill:var(--money-fill);stroke:var(--money);stroke-width:1;}
+.dgm .bx-in{fill:var(--surface-2);stroke:var(--rule);stroke-width:1;}
+.dgm .t{font:600 12.5px 'IBM Plex Sans',sans-serif;fill:currentColor;}
+.dgm .mn{font:500 11px 'IBM Plex Mono',monospace;fill:currentColor;}
+.dgm .mnS{font:400 10px 'IBM Plex Mono',monospace;fill:currentColor;}
+.dgm .sb{font:400 10.5px 'IBM Plex Sans',sans-serif;fill:var(--muted);}
+.dgm .al{font:500 9.5px 'IBM Plex Mono',monospace;fill:var(--muted);}
+.dgm .eb{font:600 10.5px 'IBM Plex Sans',sans-serif;fill:var(--muted);letter-spacing:.12em;}
+.dgm .tag{font:600 9px 'IBM Plex Sans',sans-serif;fill:var(--data);letter-spacing:.09em;}
+.dgm .tagM{font:600 9px 'IBM Plex Sans',sans-serif;fill:var(--money);letter-spacing:.09em;}
+.dgm .ln{stroke:var(--rule-strong);stroke-width:1.4;fill:none;}
+.dgm .lnM{stroke:var(--money);stroke-width:1.5;fill:none;}
+.dgm .lnS{stroke:var(--study);stroke-width:1.3;fill:none;stroke-dasharray:5 4;}
+.dgm .rule{stroke:var(--rule);stroke-width:1;}
+.dgm .mono-accent{fill:var(--money);}
+.dgm .data-accent{fill:var(--data);}
+
+/* ---- cards ---- */
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:13px 14px;box-shadow:var(--shadow);}
+.card .fn{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;display:block;margin-bottom:3px;}
+.card p{font-size:13px;color:var(--muted);margin:0;max-width:none;}
+.card.d .fn{color:var(--data);}
+.card.m .fn{color:var(--money);}
+.card.s .fn{color:var(--study);}
+
+.verdicts{border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);}
+.vrow{display:grid;grid-template-columns:200px 1fr;gap:0 18px;padding:12px 15px;border-top:1px solid var(--rule-soft);align-items:baseline;}
+.vrow:first-child{border-top:0;}
+.vrow .vf{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:var(--study);}
+.vrow .vv{font-size:13.5px;color:var(--muted);}
+.vrow .vv b{color:var(--ink);font-weight:600;}
+@media (max-width:640px){.vrow{grid-template-columns:1fr;gap:3px;}}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--rule);border-radius:4px;overflow:hidden;box-shadow:var(--shadow);font-variant-numeric:tabular-nums;}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--rule-soft);vertical-align:top;}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-top:0;background:var(--surface-2);}
+td.mono{font-family:'IBM Plex Mono',monospace;font-size:12.5px;white-space:nowrap;}
+.tscroll{overflow-x:auto;}
+
+.traps{list-style:none;padding:0;margin:0;display:grid;gap:10px;}
+.traps li{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--money);border-radius:0 4px 4px 0;padding:12px 15px;font-size:13.5px;color:var(--muted);box-shadow:var(--shadow);}
+.traps li b{color:var(--ink);font-weight:600;}
+
+.note{border-left:3px solid var(--data);background:var(--surface-2);padding:12px 16px;font-size:13.5px;color:var(--muted);border-radius:0 4px 4px 0;margin:0 0 18px;max-width:72ch;}
+.note b{color:var(--ink);}
+
+hr.soft{border:0;border-top:1px solid var(--rule);margin:0 0 38px;}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <p class="eyebrow">Demand prediction ML · SKU level · weekly forecast origins</p>
+  <h1>How this repo fits together</h1>
+  <p class="lede">The project has two halves that look alike and do opposite things. <strong>One scores the past</strong> — seven models, three boards, a dozen studies, all reading finished targets. <strong>One buys for the future</strong> — a single path from <code>forecast.py</code> to an order quantity someone spends money on. They share a dataset builder and exactly one hand-off.</p>
+</header>
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">The spine</p>
+    <h2>Every box, and what moves between them</h2>
+  </div>
+  <div class="figbox">
+    <figure>
+      <svg class="dgm wide" viewBox="0 0 1140 620" role="img" aria-label="Flow diagram. Top band: data/raw feeds src/demandml ingest, panel and features, which feeds model_lab/prepare_data.py, which writes lab_dataset.parquet; that trains the seven models in dev/, which write results and cached predictions read by the boards. Bottom band: the same prepare_data pass writes open_origins.parquet, which feeds dev/forecast.py; events.py adjusts it; policy.py turns it into an order plan CSV using an inventory CSV, the lead time and review period from assumptions.toml, and per-SKU service level from economics.py. The boards hand forecast.py a model choice and a multiplier. track.py scores shipped forecasts back against the panel.">
+        <defs>
+          <marker id="aN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--rule-strong)"/>
+          </marker>
+          <marker id="aM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--money)"/>
+          </marker>
+          <marker id="aS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--study)"/>
+          </marker>
+        </defs>
+
+        <!-- ======== BAND A ======== -->
+        <text class="eb" x="20" y="24">SCORING THE PAST</text>
+        <line class="rule" x1="20" y1="36" x2="1120" y2="36"/>
+
+        <!-- A1a data/raw -->
+        <rect class="bx bx-d" x="20" y="52" width="180" height="56" rx="3"/>
+        <text class="mn" x="32" y="74">data/raw/</text>
+        <text class="sb" x="32" y="92">sales exports · CSV fallback</text>
+
+        <!-- A1b data/db -->
+        <rect class="bx bx-d" x="20" y="124" width="180" height="68" rx="3"/>
+        <text class="mn" x="32" y="146">data/db/</text>
+        <text class="sb" x="32" y="164">database extract, or</text>
+        <text class="sb" x="32" y="181">scripts/make_sample_data.py</text>
+
+        <!-- A2 src/demandml -->
+        <rect class="bx" x="250" y="52" width="180" height="140" rx="3"/>
+        <text class="t" x="262" y="72">src/demandml/</text>
+        <rect class="bx-in" x="262" y="82" width="156" height="22" rx="2"/>
+        <text class="mnS" x="272" y="97">ingest</text>
+        <rect class="bx-in" x="262" y="108" width="156" height="22" rx="2"/>
+        <text class="mnS" x="272" y="123">panel</text>
+        <rect class="bx-in" x="262" y="134" width="156" height="22" rx="2"/>
+        <text class="mnS" x="272" y="149">features</text>
+        <text class="sb" x="262" y="175">rolling origins · leak tests</text>
+
+        <!-- A3 prepare_data -->
+        <rect class="bx" x="480" y="52" width="180" height="44" rx="3"/>
+        <text class="mnS" x="492" y="72">model_lab/prepare_data.py</text>
+        <text class="sb" x="492" y="88">one pass, two files</text>
+
+        <!-- A3a lab_dataset -->
+        <rect class="bx bx-d" x="480" y="112" width="180" height="80" rx="3"/>
+        <text class="mn" x="492" y="133">lab_dataset.parquet</text>
+        <text class="sb" x="492" y="151">weekly origins + y_cum30/90/180</text>
+        <text class="sb" x="492" y="167">always one horizon stale</text>
+        <text class="tag" x="492" y="184">MODELS TRAIN ON THIS</text>
+
+        <!-- A4 dev models -->
+        <rect class="bx" x="710" y="52" width="180" height="140" rx="3"/>
+        <text class="t" x="722" y="72">dev/ — seven models</text>
+        <text class="mnS" x="722" y="90">moving_average</text>
+        <text class="mnS" x="722" y="104">croston</text>
+        <text class="mnS" x="722" y="118">random_forest</text>
+        <text class="mnS" x="722" y="132">xgboost_gbdt</text>
+        <text class="mnS" x="722" y="146">lightgbm_additive</text>
+        <text class="mnS" x="722" y="160">lgbm_quantile</text>
+        <text class="mnS" x="722" y="174">two_stage</text>
+        <text class="tag" x="826" y="118">← COST</text>
+        <text class="tag" x="826" y="132">← WAPE</text>
+
+        <!-- A5 boards -->
+        <rect class="bx" x="940" y="52" width="180" height="140" rx="3"/>
+        <text class="t" x="952" y="72">boards</text>
+        <text class="mnS" x="952" y="92">results/*.json</text>
+        <text class="mnS" x="952" y="107">cached predictions</text>
+        <line class="rule" x1="952" y1="118" x2="1108" y2="118"/>
+        <text class="mnS" x="952" y="136">cost_board.py</text>
+        <text class="mnS" x="952" y="151">compare_models.py</text>
+        <text class="mnS" x="952" y="166">dashboard.py</text>
+        <text class="sb" x="952" y="184">ranked on cost, not WAPE</text>
+
+        <!-- band A arrows -->
+        <line class="ln" x1="202" y1="80" x2="246" y2="80" marker-end="url(#aN)"/>
+        <text class="al" x="224" y="74" text-anchor="middle">ingest</text>
+        <line class="ln" x1="432" y1="70" x2="476" y2="70" marker-end="url(#aN)"/>
+        <text class="al" x="454" y="64" text-anchor="middle">features</text>
+        <line class="ln" x1="570" y1="96" x2="570" y2="108" marker-end="url(#aN)"/>
+        <line class="ln" x1="662" y1="152" x2="706" y2="152" marker-end="url(#aN)"/>
+        <text class="al" x="684" y="146" text-anchor="middle">train</text>
+        <line class="ln" x1="892" y1="122" x2="936" y2="122" marker-end="url(#aN)"/>
+        <text class="al" x="914" y="116" text-anchor="middle">backtest</text>
+
+        <!-- ======== BAND B ======== -->
+        <text class="eb" x="20" y="244">BUYING FOR THE FUTURE</text>
+        <line class="rule" x1="20" y1="258" x2="1120" y2="258"/>
+
+        <!-- split: prepare_data also writes open_origins -->
+        <path class="ln" d="M480,84 L464,84 L464,300 L476,300" marker-end="url(#aN)"/>
+        <text class="al" x="456" y="240" text-anchor="end">one pass, two files</text>
+
+        <!-- stock position into the inventory input -->
+        <path class="ln" d="M202,160 L218,160 L218,300 L246,300" marker-end="url(#aN)"/>
+        <text class="al" x="226" y="270">on hand · on order</text>
+
+        <!-- boards hand the choice down -->
+        <path class="lnM" d="M1030,194 L1030,250 L800,250 L800,272" marker-end="url(#aM)"/>
+        <text class="al" x="915" y="242" text-anchor="middle">model + multiplier k, per horizon</text>
+
+        <!-- B inventory input -->
+        <rect class="bx" x="250" y="276" width="180" height="60" rx="3"/>
+        <text class="mn" x="262" y="297">data/inventory/*.csv</text>
+        <text class="sb" x="262" y="314">on hand · on order</text>
+        <text class="sb" x="262" y="329">lead time: assumptions.toml</text>
+
+        <!-- B economics -->
+        <rect class="bx" x="250" y="356" width="180" height="60" rx="3"/>
+        <text class="mn" x="262" y="377">economics.py</text>
+        <text class="sb" x="262" y="394">per-SKU service level,</text>
+        <text class="sb" x="262" y="409">anchored to CU:CO</text>
+
+        <!-- B open_origins -->
+        <rect class="bx bx-m" x="480" y="276" width="180" height="72" rx="3"/>
+        <text class="mn" x="492" y="297">open_origins.parquet</text>
+        <text class="sb" x="492" y="314">newest origins, no targets</text>
+        <text class="sb" x="492" y="329">disjoint from lab_dataset</text>
+        <text class="tagM" x="492" y="344">FORECASTS START HERE</text>
+
+        <!-- B forecast -->
+        <rect class="bx bx-m" x="710" y="276" width="180" height="96" rx="3"/>
+        <text class="mn" x="722" y="297">dev/forecast.py</text>
+        <text class="sb" x="722" y="315">the only forward-looking</text>
+        <text class="sb" x="722" y="330">entry point</text>
+        <line class="rule" x1="722" y1="340" x2="878" y2="340"/>
+        <text class="mnS" x="722" y="356">forecast_typical</text>
+        <text class="mnS" x="722" y="368">forecast_planning</text>
+
+        <!-- B events -->
+        <rect class="bx" x="710" y="400" width="180" height="56" rx="3"/>
+        <text class="mn" x="722" y="421">events.py ← events.csv</text>
+        <text class="sb" x="722" y="438">expected effect only;</text>
+        <text class="sb" x="722" y="450">gated on entered_at</text>
+        <line class="ln" x1="800" y1="398" x2="800" y2="376" marker-end="url(#aN)"/>
+        <text class="al" x="808" y="390">after the model</text>
+
+        <!-- B policy -->
+        <rect class="bx bx-m" x="940" y="276" width="180" height="96" rx="3"/>
+        <text class="mn" x="952" y="297">dev/policy.py</text>
+        <text class="sb" x="952" y="315">buys against lead time</text>
+        <text class="sb" x="952" y="330">+ review, not 30/90/180</text>
+        <line class="rule" x1="952" y1="340" x2="1108" y2="340"/>
+        <text class="sb" x="952" y="356">MOQ + carton, always up</text>
+        <text class="sb" x="952" y="368">no stock record → null</text>
+
+        <!-- B order plan -->
+        <rect class="bx bx-m" x="940" y="530" width="180" height="60" rx="3"/>
+        <text class="mn" x="952" y="551">orders/order_plan_*.csv</text>
+        <text class="sb" x="952" y="568">order_qty per SKU —</text>
+        <text class="sb" x="952" y="583">the money number</text>
+
+        <!-- B track -->
+        <rect class="bx" x="710" y="530" width="180" height="60" rx="3"/>
+        <text class="mn" x="722" y="551">dev/track.py</text>
+        <text class="sb" x="722" y="568">scores what shipped,</text>
+        <text class="sb" x="722" y="583">once windows elapse</text>
+
+        <!-- band B arrows -->
+        <line class="lnM" x1="662" y1="312" x2="706" y2="312" marker-end="url(#aM)"/>
+        <text class="al" x="684" y="306" text-anchor="middle">predict</text>
+        <line class="lnM" x1="892" y1="324" x2="936" y2="324" marker-end="url(#aM)"/>
+        <text class="al" x="914" y="318" text-anchor="middle">planning</text>
+        <line class="lnM" x1="1030" y1="374" x2="1030" y2="526" marker-end="url(#aM)"/>
+        <text class="al" x="1038" y="452">order_qty</text>
+
+        <!-- inputs bus into policy -->
+        <path class="ln" d="M432,306 L444,306 L444,505 L1010,505 L1010,378" marker-end="url(#aN)"/>
+        <path class="ln" d="M432,386 L444,386"/>
+        <text class="al" x="727" y="497" text-anchor="middle">lead time + review · on hand · per-SKU service level</text>
+
+        <!-- order plan into track -->
+        <line class="ln" x1="938" y1="560" x2="894" y2="560" marker-end="url(#aN)"/>
+        <text class="al" x="916" y="554" text-anchor="middle">scored</text>
+
+        <!-- track feedback -->
+        <path class="lnS" d="M708,560 L236,560 L236,212 L340,212 L340,198" marker-end="url(#aS)"/>
+        <text class="al" x="246" y="206">realised demand vs what shipped</text>
+      </svg>
+      <figcaption><b>The one hand-off is the dashed-into-red arrow at the top right.</b> Backtests never touch the forecast path directly — they only hand <code>forecast.py</code> a model name and a multiplier per horizon, chosen on cached predictions. Everything else the order plan needs (stock, lead time, cost ratio) comes in along the bottom from an inventory CSV and <code>assumptions.toml</code>, which never enter the model pipeline at all.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="soft">
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">Trap one</p>
+    <h2>Why there are two dataset files</h2>
+  </div>
+  <p>Both come out of <code>prepare_data.py</code> in the same pass, from the same expressions. They are not a copy and a subset — they are disjoint, and building serving features anywhere else is how train/serve skew gets in.</p>
+  <div class="figbox">
+    <figure>
+      <svg class="dgm mid" viewBox="0 0 700 200" role="img" aria-label="Timeline. lab_dataset.parquet origins stop one full horizon before the data ends, because every row needs a finished target. open_origins.parquet covers that last horizon, where the data exists but the horizon has not elapsed. Forecasting from the training file would silently answer a question about the past.">
+        <defs>
+          <marker id="tA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--rule-strong)"/>
+          </marker>
+        </defs>
+        <text class="mnS" x="14" y="46">lab_dataset.parquet</text>
+        <rect class="bx bx-d" x="14" y="54" width="456" height="24" rx="2"/>
+        <text class="sb" x="26" y="71">origins whose target has already happened</text>
+
+        <text class="mnS" x="474" y="108">open_origins.parquet</text>
+        <rect class="bx bx-m" x="470" y="116" width="120" height="24" rx="2"/>
+        <text class="sb" x="480" y="133">no targets</text>
+
+        <line class="rule" x1="470" y1="40" x2="470" y2="168"/>
+        <line class="rule" x1="590" y1="100" x2="590" y2="168"/>
+        <text class="al" x="470" y="182" text-anchor="middle">newest closed origin</text>
+        <text class="al" x="590" y="182" text-anchor="middle">last day</text>
+        <text class="sb" x="616" y="182">of data</text>
+
+        <line class="ln" x1="474" y1="160" x2="586" y2="160" marker-end="url(#tA)" marker-start="url(#tA)"/>
+        <text class="al" x="530" y="154" text-anchor="middle">one full horizon</text>
+        <text class="sb" x="14" y="160">the horizon you throw away by training-set forecasting →</text>
+      </svg>
+      <figcaption>The newest row in <code>lab_dataset</code> is a full horizon stale <b>by construction</b>: its target had to have already happened. <code>tests/test_forecast_origins.py</code> asserts the two files are disjoint, that the open set is strictly newer, and that every feature is built identically in both.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">Trap two</p>
+    <h2>The buy window sits past the evidence</h2>
+  </div>
+  <p>Models are trained at 30, 90 and 180 days. Nobody buys on those numbers — you buy on lead time plus review period. When that window runs past 180 days, every order quantity rests on an extrapolation nothing was trained on.</p>
+  <div class="figbox">
+    <figure>
+      <svg class="dgm mid" viewBox="0 0 700 176" role="img" aria-label="A day axis from zero to 280. Backtested horizons cover 0 to 180 days as a solid bar; beyond 180 days the bar is dashed, marked flat-rate extrapolation. A long coverage window, lead time plus review period, falls inside the dashed region. Annotation: window_backtest.py prices the extrapolation.">
+        <text class="sb" x="520" y="34" text-anchor="middle">a long coverage window = lead time + review period</text>
+        <path d="M538,42 L544,52 L532,52 z" fill="var(--money)"/>
+        <line x1="538" y1="52" x2="538" y2="122" stroke="var(--money)" stroke-width="1.4"/>
+
+        <rect class="bx bx-d" x="60" y="86" width="386" height="18" rx="2"/>
+        <rect x="446" y="86" width="214" height="18" rx="2" fill="none" stroke="var(--money)" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <text class="sb" x="253" y="99" text-anchor="middle">backtested horizons</text>
+        <text class="sb" x="553" y="99" text-anchor="middle">flat-rate extrapolation</text>
+
+        <line class="rule" x1="60" y1="112" x2="660" y2="112"/>
+        <line class="rule" x1="124" y1="104" x2="124" y2="118"/>
+        <line class="rule" x1="253" y1="104" x2="253" y2="118"/>
+        <line class="rule" x1="446" y1="104" x2="446" y2="118"/>
+        <text class="al" x="124" y="132" text-anchor="middle">30 d</text>
+        <text class="al" x="253" y="132" text-anchor="middle">90 d</text>
+        <text class="al" x="446" y="132" text-anchor="middle">180 d</text>
+        <text class="al" x="60" y="132" text-anchor="middle">0</text>
+        <text class="sb" x="553" y="154" text-anchor="middle">priced by dev/window_backtest.py</text>
+      </svg>
+      <figcaption><b>Whenever the coverage window passes 180 days, the order rests on extrapolation.</b> <code>policy.interpolate_cumulative</code> owns that path; <code>window_backtest.py</code> and <code>longhorizon.py</code> price it rather than leaving it an untested assumption under every purchase order.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="soft">
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">Module reference</p>
+    <h2>Who is connected to what</h2>
+  </div>
+  <div class="note"><b>The actual coupling is simpler than the file count.</b> Every file in <code>dev/</code> imports <code>dev/common.py</code>; <code>common.py</code> imports only <code>demandml.config</code>, <code>demandml.metrics</code> and <code>demandml.splits</code>. The seven model files import nothing but <code>common</code> (plus <code>lgbm_core</code>, which is a shared estimator, not a model). Cross-imports between siblings are rare and deliberate: <code>policy → economics</code>, <code>forecast → events</code>, <code>window_backtest → policy</code>.</div>
+
+  <h3 style="margin:22px 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--data)">Core library — <span class="mono">src/demandml/</span></h3>
+  <div class="grid">
+    <div class="card d"><span class="fn">ingest · clean · panel</span><p>Raw CSV to a daily SKU panel. Drops the partial last export day and the leaky rolling averages the export ships.</p></div>
+    <div class="card d"><span class="fn">features.py</span><p>Lags and windows, all <code>.over(SKU)</code>. Owns the banned-column set — anything measured on the target day lives there, not in the matrix.</p></div>
+    <div class="card d"><span class="fn">splits.py</span><p>Rolling origin with a horizon-sized gap. Random k-fold scores far too well on a panel like this.</p></div>
+    <div class="card d"><span class="fn">metrics.py · config.py</span><p>WAPE, bias, the cost metric, and the path/constant surface every entry point reads.</p></div>
+  </div>
+
+  <h3 style="margin:26px 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Dataset + shortlist — <span class="mono">model_lab/</span></h3>
+  <div class="grid">
+    <div class="card"><span class="fn">prepare_data.py</span><p>Builds both dataset files, the <code>ly_*</code> year-ago columns and the <code>y_cum_m1..m6</code> month slices. The one place serving features may be built.</p></div>
+    <div class="card"><span class="fn">compare_models.py</span><p>The full-field board. The seven in <code>dev/</code> were shortlisted out of here.</p></div>
+    <div class="card"><span class="fn">segment_report.py</span><p>WAPE by line, marketplace, volume band and Syntetos-Boylan quadrant. Read it before quoting a catalogue-wide bias — lines with opposite biases cancel.</p></div>
+  </div>
+
+  <h3 style="margin:26px 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--money)">The buying path — <span class="mono">dev/</span></h3>
+  <div class="grid">
+    <div class="card m"><span class="fn">forecast.py</span><p>Units over the next 30/90/180 d per SKU. Emits demand, never an order quantity — the panel has no stock or on-order, so there is deliberately no <code>order_qty</code> column.</p></div>
+    <div class="card m"><span class="fn">policy.py</span><p>Forecast to order quantity. Interpolates the cumulative forecast onto lead time + review, rounds MOQ and cartons up, routes recovered SKUs to a review file.</p></div>
+    <div class="card m"><span class="fn">economics.py</span><p>One cost ratio per SKU, anchored so <code>CU:CO</code> sets the level. The anchoring cancels three unsourceable assumptions exactly — and a measured per-SKU storage term would break that cancellation.</p></div>
+    <div class="card m"><span class="fn">inventory CSV</span><p>On hand and on order per SKU, passed to <code>policy.py</code> as <code>--inventory</code>. The sample data ships one; without it <code>order_qty</code> stays null by design.</p></div>
+    <div class="card m"><span class="fn">events.py</span><p>The only place human judgement enters. Expected effect only, gated on <code>entered_at</code>. With no file the adjustment is exactly 1.0× + 0.</p></div>
+    <div class="card m"><span class="fn">coverage.py</span><p>Which catalogue SKUs the plan does not answer for. <code>policy.coverage_gap</code> delegates here so the plan and the report cannot disagree.</p></div>
+  </div>
+
+  <h3 style="margin:26px 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)">Boards and search — <span class="mono">dev/</span></h3>
+  <div class="grid">
+    <div class="card"><span class="fn">cost_board.py</span><p>Ranks on inventory cost from cached predictions. Read this, not the WAPE board, before anyone makes a purchasing decision — the two disagree about who is first.</p></div>
+    <div class="card"><span class="fn">compare_models.py · dashboard.py</span><p>The WAPE board and its report; six panels per model plus four cross-model charts, never refits.</p></div>
+    <div class="card"><span class="fn">tune.py · compare_tuning.py</span><p>Search cut at the earliest fold's <code>train_end</code>, so it can never score a test row. A tuned model is allowed to come out worse, and the report says so.</p></div>
+  </div>
+</section>
+
+<hr class="soft">
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">The studies</p>
+    <h2>Files that ship a verdict, not a number</h2>
+  </div>
+  <p>These sit off the spine. Each reads cached results, answers one question and writes one markdown file. They change what you believe, not what gets ordered.</p>
+  <div class="verdicts">
+    <div class="vrow"><span class="vf">regime.py</span><span class="vv">Read this before trusting any bias number here. A "systematic under-forecast" seen on a few folds can be an artifact of one demand regime — over many folds average bias sits <b>near zero</b> while the fold-to-fold swing is far larger.</span></div>
+    <div class="vrow"><span class="vf">debias.py</span><span class="vv">The bias is a shape, not a level. The global multiplier captures <b>most of the gain</b>; everything past it is small and flips sign by horizon.</span></div>
+    <div class="vrow"><span class="vf">calibration.py</span><span class="vv">Should the multiplier be one number? Per-SKU can win at short horizons and lose at 180 d, because a SKU has about one non-overlapping window there. <b>Granularity is capped by evidence.</b></span></div>
+    <div class="vrow"><span class="vf">event_backtest.py</span><span class="vv">Replays recorded deals at the backtest origins. Cost <b>barely moves</b>, in either direction. The multiplier already prices in the average promo; enter only events with no precedent.</span></div>
+    <div class="vrow"><span class="vf">longhorizon.py</span><span class="vv">Is the flat-rate extension past 180 d good enough to buy against? Costs <b>a little</b>, but WAPE is essentially identical and the sign flips fold to fold. Not worth a fourth horizon.</span></div>
+    <div class="vrow"><span class="vf">window_backtest.py</span><span class="vv">Scores the forecast at the window you actually buy against. Calls <code>policy.interpolate_cumulative</code> rather than reimplementing it, so it scores the real ordering path.</span></div>
+    <div class="vrow"><span class="vf">datacheck.py</span><span class="vv">Does the input still look like the input this was built on? Quantiles, not means. Matters most in production use: a wrong input produces a <b>plausible</b> forecast.</span></div>
+    <div class="vrow"><span class="vf">track.py</span><span class="vv">The only file that can catch train/serve skew in the open-origin path — a backtest stays clean when that breaks. Also scores the human overrides, not just applies them.</span></div>
+  </div>
+</section>
+
+<hr class="soft">
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">One codebase, three output sets</p>
+    <h2>Everything in <span class="mono">dev/</span> exists three times</h2>
+  </div>
+  <p><code>common.set_mode()</code> switches which half you are writing. Model files are never edited by tuning — their <code>PARAMS</code> stay put and tuned values arrive as keyword overrides at build time, so the baseline stays reproducible from the code as it stands.</p>
+  <div class="tscroll">
+  <table>
+    <tr><th>Flag</th><th>Results</th><th>Figures</th><th>What it means</th></tr>
+    <tr><td class="mono">(none)</td><td class="mono">results/</td><td class="mono">initial_figures/</td><td>The models as their files are written. The reproducible baseline.</td></tr>
+    <tr><td class="mono">--tuned</td><td class="mono">results_tuned/</td><td class="mono">tuned_figures/</td><td>After <code>tune.py</code> picked hyper-parameters. Worse on cost for most models — do not adopt wholesale.</td></tr>
+    <tr><td class="mono">--cost</td><td class="mono">results_cost/</td><td class="mono">cost_figures/</td><td>Rebuilt against inventory cost instead of WAPE. Only models declaring <code>cost_params</code> can honour it — today just <code>lgbm_quantile</code>. Cannot combine with <code>--tuned</code>.</td></tr>
+  </table>
+  </div>
+  <p style="margin-top:14px;font-size:13.5px;color:var(--muted)"><code>DEMANDML_MODE</code> pins one of these for a whole process, so a scheduled job doesn't depend on every entry point being passed the right flag. An explicit <code>set_mode()</code> still wins.</p>
+</section>
+
+<section>
+  <div class="sechead">
+    <p class="eyebrow">Before you change anything</p>
+    <h2>The things that bite</h2>
+  </div>
+  <ul class="traps">
+    <li><b>A timing bug makes scores better.</b> That's why <code>tests/test_leakage.py</code> exists — run it after touching <code>features.py</code> or <code>splits.py</code>, and <code>test_tuning_isolation.py</code> after touching <code>tune.py</code> or <code>set_mode</code>. Nothing else complains.</li>
+    <li><b>Stock-out days are censored, not zero.</b> <code>sample_weight = 0</code> on OOS zero-days. Scoring with <code>keep_censored=True</code> measures stock-outs, not demand.</li>
+    <li><b>WAPE is a reporting metric, not an objective.</b> Its optimum is the conditional median, which sits below the mean on this panel. The cost-minimising forecast is the <code>CU/(CU+CO)</code> quantile, with the ratio set in <code>assumptions.toml</code>. Read <code>common.target_quantile()</code>, never hard-code it.</li>
+    <li><b><code>CU:CO</code> is not a hyper-parameter.</b> If it sits in <code>tune.py</code>'s search space, a WAPE-driven search pulls the target below the median — i.e. decides, on nobody's authority, that a stockout is cheap. <code>tests/test_cost_metric.py</code> fails if it comes back.</li>
+    <li><b>A SKU with no stock record gets <code>order_qty</code> = null, never zero.</b> Polars evaluates <code>NaN &gt; 0</code> as TRUE, so a NaN sentinel there silently orders a full window of cover for everything unmatched.</li>
+    <li><b>The multiplier map must reproduce the cost board.</b> The optimal scalar is the <code>cu/(cu+co)</code> quantile of <code>actual/predicted</code> weighted by <em>predicted</em> — that falls out of the first-order condition. Weighting by actual over-orders the whole catalogue by several percent, and nothing else would notice.</li>
+    <li><b>A green CI tick is narrower than it looks.</b> Two of the four leakage guards skip without <code>data/processed/</code>.</li>
+  </ul>
+</section>
+
+</div>
+</body>
+</html>
