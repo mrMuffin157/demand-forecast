@@ -1,0 +1,28 @@
+# ======================================================================================
+#  BUSINESS ASSUMPTIONS -- EXAMPLE VALUES ONLY
+# ======================================================================================
+#
+# These are illustrative numbers for running the project on the generated sample data.
+# They are NOT measured from, or taken from, any real business. Replace every one of them
+# with your own figures before using the order quantities for anything.
+#
+# Everything that depends on them reads this one file (via `demandml.assumptions`).
+# Point DEMANDML_ASSUMPTIONS at another TOML file to use different values.
+
+[cost]
+# Cost of one unit of unmet demand relative to one unit of leftover stock. Only the ratio
+# matters. 2:1 means "a stock-out hurts twice as much as a unit of dead stock", which
+# makes the cost-minimising forecast the 2/(2+1) ~ 67th percentile of demand.
+understock = 2.0   # CU (example)
+overstock = 1.0    # CO (example)
+
+[economics]
+# Per-SKU cost ratio inputs (dev/economics.py). Textbook-style placeholders.
+holding_rate = 0.25    # annual carrying cost as a fraction of unit cost (example)
+recapture = 0.25       # share of stocked-out demand that comes back later (example)
+markdown_risk = 0.05   # expected write-down on unsold stock, fraction of cost (example)
+
+[ordering]
+# Order-quantity policy (dev/policy.py).
+lead_time_days = 60    # order placed -> sellable (example)
+review_days = 30       # days until the next order can be placed (example)
